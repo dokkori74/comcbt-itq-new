@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ITQ 채점 관리자 | 정답 파일 관리</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--blue:#1D6FA5;--blue-l:#E6F1FB;--blue-d:#0C447C;--green:#3B6D11;--green-l:#EAF3DE;--red:#E24B4A;--red-l:#FCEBEB;--amber:#BA7517;--amber-l:#FAEEDA;--gray:#5F5E5A;--gray-l:#F1EFE8;--border:rgba(0,0,0,0.1);--bg:#F8F7F4;--card:#fff;--text:#2C2C2A;--text2:#5F5E5A;--r:10px;--r-sm:7px}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+.topbar{background:var(--blue-d);color:#fff;padding:0 24px;height:52px;display:flex;align-items:center;gap:14px}
+.topbar h1{font-size:15px;font-weight:600}
+.badge{font-size:11px;background:rgba(255,255,255,0.2);padding:3px 8px;border-radius:20px}
+.wrap{max-width:860px;margin:0 auto;padding:24px 20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.card-title{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:14px}
+.tabs{display:flex;gap:4px;background:var(--gray-l);padding:4px;border-radius:10px;margin-bottom:16px}
+.tab{flex:1;height:34px;border:none;background:none;cursor:pointer;border-radius:7px;font-size:13px;font-weight:500;color:var(--text2);transition:all .12s}
+.tab.on{background:#fff;color:var(--blue);border:1px solid var(--border);font-weight:600}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--r);padding:28px;text-align:center;cursor:pointer;transition:all .15s;position:relative;background:var(--bg)}
+.upload-zone:hover{border-color:var(--blue);background:var(--blue-l)}
+.upload-zone.has{border-color:var(--green);background:var(--green-l);border-style:solid}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-icon{font-size:28px;margin-bottom:8px}
+.upload-label{font-size:13px;color:var(--text2)}
+.form-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.form-label{font-size:13px;color:var(--text2);min-width:80px}
+.form-select,.form-input{flex:1;height:36px;border:1px solid var(--border);border-radius:var(--r-sm);padding:0 12px;font-size:13px;background:#fff;color:var(--text);outline:none}
+.form-select:focus,.form-input:focus{border-color:var(--blue)}
+.btn{height:38px;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;padding:0 18px;transition:all .12s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue-d)}.btn-primary:disabled{background:var(--gray);cursor:not-allowed}
+.btn-danger{background:var(--red);color:#fff}
+.btn-outline{background:#fff;color:var(--text);border-color:var(--border)}.btn-outline:hover{background:var(--gray-l)}
+.btn-row{display:flex;gap:8px;margin-top:14px}
+table.ftbl{width:100%;border-collapse:collapse;font-size:13px}
+table.ftbl th{text-align:left;padding:8px 10px;font-size:11px;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border)}
+table.ftbl td{padding:10px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+table.ftbl tr:last-child td{border-bottom:none}
+table.ftbl tr:hover td{background:var(--gray-l)}
+.chip{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px}
+.chip-blue{background:var(--blue-l);color:var(--blue-d)}.chip-green{background:var(--green-l);color:var(--green)}.chip-red{background:var(--red-l);color:var(--red)}
+.notice{font-size:12px;line-height:1.7;background:var(--amber-l);color:var(--amber);border-radius:var(--r-sm);padding:10px 14px;margin-top:10px}
+.success-msg{font-size:13px;background:#EAF3DE;color:#3B6D11;border-radius:var(--r-sm);padding:10px 14px;margin-top:10px;display:none;font-weight:600}
+.error-msg{font-size:13px;background:#FCEBEB;color:#E24B4A;border-radius:var(--r-sm);padding:10px 14px;margin-top:10px;display:none;white-space:pre-line}
+.loading-row{display:none;align-items:center;gap:8px;padding:10px 14px;background:var(--blue-l);border-radius:var(--r-sm);font-size:13px;color:var(--blue);margin-top:10px}
+.loading-row.show{display:flex}
+.spinner{width:16px;height:16px;border:2px solid var(--blue-l);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:var(--gray-l);border-radius:var(--r-sm);padding:14px;text-align:center}
+.stat-val{font-size:22px;font-weight:700}.stat-lbl{font-size:11px;color:var(--text2);margin-top:3px}
+.stat-val.blue{color:var(--blue)}.stat-val.green{color:var(--green)}.stat-val.amber{color:#BA7517}
+#lock-screen{position:fixed;inset:0;background:var(--blue-d);display:flex;align-items:center;justify-content:center;z-index:999}
+#lock-screen.hidden{display:none}
+.lock-box{background:#fff;border-radius:16px;padding:36px 40px;width:340px;text-align:center}
+.lock-box h2{font-size:18px;margin-bottom:6px}.lock-box p{font-size:13px;color:var(--text2);margin-bottom:20px}
+.lock-box input{width:100%;height:44px;border:1px solid var(--border);border-radius:var(--r-sm);padding:0 14px;font-size:15px;text-align:center;letter-spacing:.2em;outline:none;margin-bottom:12px}
+.lock-box input:focus{border-color:var(--blue)}
+.lock-box button{width:100%;height:44px;background:var(--blue);color:#fff;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:600;cursor:pointer}
+.lock-err{font-size:12px;color:var(--red);margin-top:8px;display:none}
+</style>
+</head>
+<body>
+<div id="lock-screen">
+  <div class="lock-box">
+    <div style="font-size:36px;margin-bottom:12px">🔐</div>
+    <h2>관리자 로그인</h2>
+    <p>ITQ 채점 관리자 페이지입니다</p>
+    <input type="password" id="pw-input" placeholder="비밀번호 입력">
+    <button onclick="checkPw()">로그인</button>
+    <div class="lock-err" id="lock-err">비밀번호가 틀렸습니다</div>
+  </div>
+</div>
+<div class="topbar">
+  <h1>⚙️ ITQ 채점 관리자</h1>
+  <span class="badge">정답 파일 관리</span>
+  <span style="margin-left:auto;font-size:12px;opacity:.7" id="admin-time"></span>
+  <a href="/" style="color:#fff;font-size:12px;opacity:.8;text-decoration:none">← 채점 페이지</a>
+</div>
+<div class="wrap">
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-val blue" id="st-excel">0</div><div class="stat-lbl">Excel 회차</div></div>
+    <div class="stat-card"><div class="stat-val green" id="st-ppt">0</div><div class="stat-lbl">PPT 회차</div></div>
+    <div class="stat-card"><div class="stat-val amber" id="st-hangul">0</div><div class="stat-lbl">한글 회차</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">정답 파일 업로드</div>
+    <div class="form-row"><span class="form-label">과목</span>
+      <select class="form-select" id="up-subject">
+        <option value="excel">ITQ Excel</option>
+        <option value="ppt">ITQ 파워포인트</option>
+        <option value="hangul">ITQ 한글</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <span class="form-label">회차 ID</span>
+      <input class="form-input" id="up-round" type="text" placeholder="예: 2026_01  (연도_월)" maxlength="10">
+      <span style="font-size:12px;color:var(--text2);min-width:160px" id="round-hint">→ 2026년 1월로 표시됩니다</span>
+    </div>
+    <div style="margin-top:12px">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:600">정답 파일 선택</div>
+      <div class="upload-zone" id="zone-correct">
+        <input type="file" id="file-correct" accept=".xlsx,.pptx,.hwpx,.xls,.ppt,.hwp" onchange="onFileSelect(this)">
+        <div class="upload-icon">📋</div>
+        <div class="upload-label" id="lbl-correct">정답 파일 (.xlsx / .pptx / .hwpx) 선택</div>
+      </div>
+    </div>
+    <div class="loading-row" id="up-loading"><div class="spinner"></div><span>업로드 중...</span></div>
+    <div class="success-msg" id="up-success"></div>
+    <div class="error-msg" id="up-error"></div>
+    <div class="notice">📌 파일명은 회차 ID 기준으로 저장됩니다. 같은 회차를 다시 올리면 덮어씁니다.</div>
+    <div class="btn-row"><button class="btn btn-primary" id="btn-upload" onclick="uploadCorrect()">📤 정답 파일 등록</button></div>
+  </div>
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div class="card-title" style="margin:0">등록된 정답 파일 목록</div>
+      <button class="btn btn-outline" style="height:30px;font-size:12px" onclick="loadRounds()">🔄 새로고침</button>
+    </div>
+    <div class="tabs">
+      <button class="tab on" id="lt-excel" onclick="showList('excel')">Excel</button>
+      <button class="tab" id="lt-ppt" onclick="showList('ppt')">파워포인트</button>
+      <button class="tab" id="lt-hangul" onclick="showList('hangul')">한글</button>
+    </div>
+    <table class="ftbl"><thead><tr><th>회차 ID</th><th>표시 이름</th><th>파일명</th><th>상태</th><th></th></tr></thead><tbody id="list-tbody"></tbody></table>
+    <div id="list-empty" style="text-align:center;padding:30px;color:var(--text2);font-size:13px;display:none">등록된 정답 파일이 없습니다.</div>
+  </div>
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div class="card-title" style="margin:0">채점 결과 현황</div>
+      <button class="btn btn-outline" style="height:30px;font-size:12px" onclick="exportCSV()">📥 CSV 내보내기</button>
+    </div>
+    <table class="ftbl"><thead><tr><th>수험번호</th><th>이름</th><th>과목</th><th>회차</th><th style="text-align:right">점수</th><th>합격</th><th>채점일시</th></tr></thead><tbody id="results-tbody"></tbody></table>
+    <div id="results-empty" style="text-align:center;padding:30px;color:var(--text2);font-size:13px;display:none">채점 기록 없음</div>
+  </div>
+</div>
+<script>
+const ADMIN_PW='dokkori2025';
+function checkPw(){
+  if(document.getElementById('pw-input').value===ADMIN_PW){document.getElementById('lock-screen').classList.add('hidden');init();}
+  else{document.getElementById('lock-err').style.display='block';document.getElementById('pw-input').value='';}
+}
+document.getElementById('pw-input').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw();});
+document.getElementById('up-round').addEventListener('input',function(){
+  const v=this.value;const h=document.getElementById('round-hint');
+  if(/^\d{4}_\d{2}$/.test(v)){const[y,m]=v.split('_');h.textContent='→ '+y+'년 '+parseInt(m)+'월로 표시';h.style.color='var(--green)';}
+  else{h.textContent='→ 형식: 연도_월 (예: 2026_01)';h.style.color='var(--text2)';}
+});
+document.getElementById('up-round').addEventListener('blur',function(){
+  const v=this.value.trim();
+  if(/^\d{6}$/.test(v)){this.value=v.slice(0,4)+'_'+v.slice(4,6);this.dispatchEvent(new Event('input'));}
+});
+let allRounds={};let allResults=[];let curSubj='excel';
+function init(){document.getElementById('admin-time').textContent=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});loadRounds();loadResults();}
+function onFileSelect(input){const z=document.getElementById('zone-correct'),l=document.getElementById('lbl-correct');if(input.files.length>0){z.classList.add('has');l.textContent=input.files[0].name;l.style.color='var(--green)';l.style.fontWeight='600';}}
+async function uploadCorrect(){
+  const subject=document.getElementById('up-subject').value;
+  let round_id=document.getElementById('up-round').value.trim();
+  const file=document.getElementById('file-correct').files[0];
+  if(/^\d{6}$/.test(round_id)){round_id=round_id.slice(0,4)+'_'+round_id.slice(4,6);document.getElementById('up-round').value=round_id;}
+  if(!round_id){showErr('⚠️ 회차 ID를 입력하세요.\n예: 2026_01 (2026년 1월)');return;}
+  if(!/^\d{4}_\d{2}$/.test(round_id)){showErr('⚠️ 형식 오류: 연도_월 형식\n예: 2026_01');return;}
+  if(!file){showErr('⚠️ 정답 파일을 선택하세요.');return;}
+  document.getElementById('up-success').style.display='none';document.getElementById('up-error').style.display='none';
+  document.getElementById('up-loading').classList.add('show');document.getElementById('btn-upload').disabled=true;
+  const fd=new FormData();fd.append('subject',subject);fd.append('round_id',round_id);fd.append('file',file);
+  try{
+    const res=await fetch('api/upload_correct.php',{method:'POST',body:fd});
+    const text=await res.text();
+    let data;
+    try{data=JSON.parse(text);}catch(e){showErr('서버 오류 (JSON 파싱 실패):\n'+text.substring(0,300));return;}
+    if(data.error){showErr('❌ '+data.error);}
+    else{
+      const suc=document.getElementById('up-success');
+      suc.textContent='✅ 등록 완료! ['+subject.toUpperCase()+' / '+round_id+'] '+data.file;
+      suc.style.display='block';
+      document.getElementById('up-round').value='';
+      document.getElementById('zone-correct').classList.remove('has');
+      document.getElementById('lbl-correct').textContent='정답 파일 (.xlsx / .pptx / .hwpx) 선택';
+      document.getElementById('lbl-correct').style.color='';
+      document.getElementById('file-correct').value='';
+      loadRounds();
+    }
+  }catch(e){showErr('❌ 연결 실패: '+e.message);}
+  document.getElementById('up-loading').classList.remove('show');document.getElementById('btn-upload').disabled=false;
+}
+async function loadRounds(){
+  try{const res=await fetch('api/rounds.php');const data=await res.json();allRounds=data.rounds||{};updateStats();showList(curSubj);}
+  catch(e){allRounds={excel:[],ppt:[],hangul:[]};updateStats();showList(curSubj);}
+}
+function updateStats(){document.getElementById('st-excel').textContent=(allRounds.excel||[]).length;document.getElementById('st-ppt').textContent=(allRounds.ppt||[]).length;document.getElementById('st-hangul').textContent=(allRounds.hangul||[]).length;}
+function showList(subj){
+  curSubj=subj;['excel','ppt','hangul'].forEach(s=>document.getElementById('lt-'+s).classList.toggle('on',s===subj));
+  const rounds=allRounds[subj]||[];const tbody=document.getElementById('list-tbody');const empty=document.getElementById('list-empty');
+  tbody.innerHTML='';
+  if(!rounds.length){empty.style.display='block';return;}empty.style.display='none';
+  rounds.forEach(r=>{const tr=document.createElement('tr');tr.innerHTML='<td style="font-family:monospace;font-size:12px">'+r.id+'</td><td><strong>'+r.label+'</strong></td><td style="font-size:12px;color:var(--text2)">'+r.file+'</td><td><span class="chip chip-green">등록됨</span></td><td><button class="btn btn-danger" style="height:28px;font-size:11px;padding:0 10px" onclick="delRound(\''+subj+'\',\''+r.id+'\',\''+r.label+'\')">삭제</button></td>';tbody.appendChild(tr);});
+}
+async function delRound(s,id,label){
+  if(!confirm('['+label+'] 정답 파일을 삭제할까요?'))return;
+  try{const fd=new FormData();fd.append('subject',s);fd.append('round_id',id);const res=await fetch('api/delete_correct.php',{method:'POST',body:fd});const d=await res.json();if(d.ok)loadRounds();else alert(d.error||'삭제 실패');}
+  catch(e){alert('오류: '+e.message);}
+}
+async function loadResults(){
+  try{const res=await fetch('api/results.php');const data=await res.json();allResults=data.results||[];renderResults();}
+  catch(e){allResults=[];renderResults();}
+}
+function renderResults(){
+  const tbody=document.getElementById('results-tbody');const empty=document.getElementById('results-empty');
+  tbody.innerHTML='';
+  if(!allResults.length){empty.style.display='block';return;}empty.style.display='none';
+  const sl={excel:'Excel',ppt:'PPT',hangul:'한글'};
+  allResults.slice(0,50).forEach(r=>{const tr=document.createElement('tr');tr.innerHTML='<td style="font-family:monospace;font-size:12px">'+(r.id||'-')+'</td><td>'+(r.name||'-')+'</td><td><span class="chip chip-blue">ITQ '+(sl[r.subject]||r.subject)+'</span></td><td style="font-size:12px">'+(r.round||r.round_id||'').substring(0,12)+'</td><td style="text-align:right;font-weight:700">'+(r.score||0)+'</td><td><span class="chip '+(r.pass?'chip-green':'chip-red')+'">'+(r.pass?'합격':'불합격')+'</span></td><td style="font-size:12px;color:var(--text2)">'+(r.graded_at||'-')+'</td>';tbody.appendChild(tr);});
+}
+function exportCSV(){
+  if(!allResults.length){alert('결과 없음');return;}
+  const rows=[['수험번호','이름','과목','회차','점수','합격','채점일시']];
+  allResults.forEach(r=>rows.push([r.id||'',r.name||'-',{excel:'ITQ Excel',ppt:'ITQ PPT',hangul:'ITQ 한글'}[r.subject]||r.subject,r.round||r.round_id||'',r.score||0,r.pass?'합격':'불합격',r.graded_at||'']));
+  const csv='\uFEFF'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='ITQ_채점결과_'+new Date().toLocaleDateString('ko-KR')+'.csv';a.click();
+}
+function showErr(msg){const el=document.getElementById('up-error');el.style.display='block';el.textContent=msg;}
+</script>
+</body>
+</html>
