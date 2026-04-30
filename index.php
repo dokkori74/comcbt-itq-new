@@ -1,5 +1,6 @@
 <?php
-// /app/user_data 는 쓰기 가능 — 하위 디렉토리 자동 생성
+// /app/user_data 는 이미 존재 + 쓰기 가능 확인됨
+// 하위 디렉토리만 자동 생성
 $base = '/app/user_data';
 foreach ([
     "$base/correct_files",
