@@ -1,0 +1,1 @@
+<?php open('/tmp/hwpx_01.php').read() ?>
