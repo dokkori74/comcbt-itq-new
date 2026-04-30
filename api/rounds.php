@@ -18,7 +18,7 @@ function get_rounds(string $dir,string $subject):array{
     $folder=$dir.$subject.'/';
     if(!is_dir($folder)) return [];
     $rounds=[];
-    foreach(glob($folder.'*.*') as $f){
+    foreach(glob($folder.'*.*')?:[] as $f){
         $name=pathinfo($f,PATHINFO_FILENAME);
         $rounds[]=['id'=>$name,'label'=>round_label($name),'file'=>basename($f)];
     }
